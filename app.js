@@ -6,6 +6,7 @@ const passport = require('passport');
 const mongoose = require('mongoose');
 const usersRoute = require("./routes/users");
 const configs = require("./configs/configs.js");
+const WebSocket = require('ws');
 
 //init database
 mongoose.connect(configs.getConnectionString());
@@ -16,7 +17,7 @@ mongoose.connection.on('connected', () => {
 
 mongoose.connection.error('connected', () => {
     console.log("error Connecting to database");
-})
+});
 
 const server = express();
 server.use(cors());
@@ -40,6 +41,20 @@ server.get("/", (req, res) => {
     res.send("teste");
 });
 
-server.listen(8080, function () {
+server.listen(8082, function () {
     console.log('Server started on port %s', "8080");
+});
+
+const ws = new WebSocket('ws://localhost:8081', {
+    perMessageDeflate: false
+});
+
+ws.on('open', function open() {
+    ws.send('something');
+});
+
+ws.on('message', function incoming(data, flags) {
+    // flags.binary will be set if a binary data is received.
+    // flags.masked will be set if the data was masked.
+    console.log(data);
 });
